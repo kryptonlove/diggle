@@ -1,10 +1,12 @@
+// Элементы HTML
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const statusDiv = document.getElementById("status");
+const connectWalletBtn = document.getElementById("connectWallet");
 const gameoverDiv = document.getElementById("gameover");
 const buyLifeBtn = document.getElementById("buyLife");
 
-// Game variables
+// Игровые переменные
 let level = 1;
 let lives = 3;
 let score = 0;
@@ -12,20 +14,23 @@ let sequence = [];
 let playerSequence = [];
 let isPlayerTurn = false;
 
-// Utility functions
+// Отображение текущего статуса
 function updateStatus() {
   statusDiv.innerText = `Level: ${level} | Lives: ${lives} | Score: ${score}`;
 }
 
+// Показываем Game Over экран
 function showGameOver() {
   gameoverDiv.style.display = "block";
 }
 
+// Скрываем Game Over экран
 function hideGameOver() {
   gameoverDiv.style.display = "none";
 }
 
-function drawSquares() {
+// Рисуем квадраты
+function drawSquares(highlightIndex = -1) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const squareSize = 100;
   const positions = [
@@ -35,11 +40,12 @@ function drawSquares() {
   ];
 
   positions.forEach(([x, y], index) => {
-    ctx.fillStyle = sequence.includes(index) ? "yellow" : "gray";
+    ctx.fillStyle = index === highlightIndex ? "yellow" : "gray";
     ctx.fillRect(x, y, squareSize, squareSize);
   });
 }
 
+// Показываем последовательность
 function flashSequence() {
   isPlayerTurn = false;
   let i = 0;
@@ -55,36 +61,47 @@ function flashSequence() {
       return;
     }
 
-    drawSquares();
-    ctx.fillStyle = "yellow";
-    const squareSize = 100;
-    const [x, y] = [
-      50 + sequence[i] * 100,
-      50,
-    ];
-    ctx.fillRect(x, y, squareSize, squareSize);
-
+    drawSquares(sequence[i]);
     i++;
-  }, 800);
+  }, 1000);
 }
 
-function nextLevel() {
-  level++;
-  score += 10;
-  sequence.push(Math.floor(Math.random() * 3));
+// Генерируем случайное число
+function getRandomSquare() {
+  return Math.floor(Math.random() * 3);
+}
+
+// Начинаем раунд
+function startRound() {
+  hideGameOver();
+  playerSequence = [];
+  sequence.push(getRandomSquare());
   flashSequence();
 }
 
-function loseLife() {
-  lives--;
-  if (lives <= 0) {
-    showGameOver();
-  } else {
-    playerSequence = [];
-    flashSequence();
+// Проверяем последовательность игрока
+function checkPlayerSequence() {
+  for (let i = 0; i < playerSequence.length; i++) {
+    if (playerSequence[i] !== sequence[i]) {
+      lives--;
+      if (lives === 0) {
+        showGameOver();
+      } else {
+        alert("Wrong sequence! Try again.");
+        startRound();
+      }
+      return;
+    }
+  }
+
+  if (playerSequence.length === sequence.length) {
+    score += 10;
+    level++;
+    startRound();
   }
 }
 
+// Обрабатываем клики на канвасе
 canvas.addEventListener("click", (e) => {
   if (!isPlayerTurn) return;
 
@@ -92,59 +109,41 @@ canvas.addEventListener("click", (e) => {
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
 
-  const clickedIndex = Math.floor(x / 100) + Math.floor(y / 100) * 3;
-  playerSequence.push(clickedIndex);
-
-  if (playerSequence[playerSequence.length - 1] !== sequence[playerSequence.length - 1]) {
-    loseLife();
-    return;
+  if (x >= 50 && x <= 150 && y >= 50 && y <= 150) {
+    playerSequence.push(0);
+  } else if (x >= 150 && x <= 250 && y >= 50 && y <= 150) {
+    playerSequence.push(1);
+  } else if (x >= 250 && x <= 350 && y >= 50 && y <= 150) {
+    playerSequence.push(2);
   }
 
-  if (playerSequence.length === sequence.length) {
-    playerSequence = [];
-    nextLevel();
-  }
+  checkPlayerSequence();
 });
 
-// Start game
-updateStatus();
-nextLevel();
-
-// Ethereum provider check
-async function checkEthereumProvider() {
+// Подключение кошелька
+connectWalletBtn.addEventListener("click", async () => {
   if (typeof window.ethereum !== "undefined") {
-    console.log("Ethereum provider detected");
-    const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-    console.log("Connected account:", accounts[0]);
-    return accounts[0];
+    try {
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+      alert(`Connected: ${accounts[0]}`);
+    } catch (error) {
+      console.error("User rejected connection:", error);
+    }
   } else {
-    alert("No Ethereum provider found. Please install MetaMask or Coinbase Wallet.");
-    return null;
-  }
-}
-
-buyLifeBtn.addEventListener("click", async () => {
-  const account = await checkEthereumProvider();
-  if (!account) return;
-
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const signer = provider.getSigner();
-
-  const tx = {
-    to: "0xYourWalletAddressHere", // Replace with your wallet address
-    value: ethers.utils.parseEther("1"),
-  };
-
-  try {
-    const transaction = await signer.sendTransaction(tx);
-    console.log("Transaction hash:", transaction.hash);
-
-    // Restore one life after payment
-    lives++;
-    hideGameOver();
-    updateStatus();
-    flashSequence();
-  } catch (error) {
-    console.error("Payment failed:", error);
+    alert("No Ethereum provider detected. Install MetaMask!");
   }
 });
+
+// Покупка жизни
+buyLifeBtn.addEventListener("click", () => {
+  alert("Payment system not implemented yet!");
+  lives++;
+  updateStatus();
+  hideGameOver();
+  startRound();
+});
+
+// Запуск игры
+updateStatus();
+drawSquares();
+startRound();
