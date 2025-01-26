@@ -3,17 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diggle Game</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Memory Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    canvas {
+      border: 2px solid black;
+      margin-top: 20px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
-  <button id="loseLife">Lose Life</button>
-  <div id="lives">Lives: 3</div>
-
-  <button id="connectWallet">Connect Wallet</button>
-    
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <h1>Memory Game</h1>
+  <div id="status">Level: 1 | Lives: 3 | Score: 0</div>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <div id="gameover" style="display: none;">
+    <h2>Game Over</h2>
+    <p>Buy one more life for 1 USDC?</p>
+    <button id="buyLife">Buy Life</button>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
