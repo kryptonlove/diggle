@@ -7,6 +7,7 @@ canvas {
   border: 2px solid black;
   display: block;
   margin: 20px auto;
+  background-color: black;
 }
 button {
   padding: 10px 20px;
