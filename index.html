@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memory Game</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Circle Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Memory Game</h1>
-  <div id="status">Level: 1 | Lives: 3 | Score: 0</div>
-  <button id="connectWallet">Connect Wallet</button>
-  <button id="playGame" style="display: none;">Play</button>
-  <canvas id="gameCanvas" width="400" height="400" style="display: none;"></canvas>
-  <div id="gameOver" style="display: none;">
-    <h2>Game Over</h2>
-    <p>Buy one more life for 1 USDC?</p>
-    <button id="buyLife">Buy Life</button>
-  </div>
-  <script src="script.js"></script>
+    <div id="start-screen">
+        <button id="connect-btn">Connect Wallet and Play</button>
+    </div>
+    <div id="game-screen" style="display:none;">
+        <div id="wallet-info"></div>
+        <button id="play-btn" style="display:none;">Play</button>
+    </div>
+    <div id="gameover-screen" style="display:none;">
+        <p>Game Over</p>
+        <button id="buy-life">Buy Life for 1 USDC</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.4/dist/web3.min.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
