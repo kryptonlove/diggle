@@ -7,10 +7,20 @@ let correctCircleIndex = -1;
 let gameStarted = false;
 
 function setup() {
+    console.log("Setup function started");
     createCanvas(400, 400);
     background(255);
-    
-    console.log("Game setup started");
+
+    // Проверяем, что элементы загружены
+    const connectBtn = document.getElementById('connect-btn');
+    const playBtn = document.getElementById('play-btn');
+    const buyLifeBtn = document.getElementById('buy-life');
+
+    if (!connectBtn || !playBtn || !buyLifeBtn) {
+        console.error("One or more buttons are missing in the HTML!");
+    } else {
+        console.log("Buttons found and ready.");
+    }
 
     // Прячем стартовый экран сразу
     document.getElementById('start-screen').style.display = 'block';
@@ -19,11 +29,13 @@ function setup() {
     document.getElementById('play-btn').style.display = 'none';
 
     // Кнопка для подключения кошелька
-    document.getElementById('connect-btn').addEventListener('click', connectWallet);
+    connectBtn.addEventListener('click', connectWallet);
+
     // Кнопка для начала игры
-    document.getElementById('play-btn').addEventListener('click', startGame);
+    playBtn.addEventListener('click', startGame);
+
     // Кнопка для покупки жизни
-    document.getElementById('buy-life').addEventListener('click', buyLife);
+    buyLifeBtn.addEventListener('click', buyLife);
 }
 
 function draw() {
