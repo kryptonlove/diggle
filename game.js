@@ -1,118 +1,107 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Параметры игры
+let sequence = [];
+let playerSequence = [];
 let level = 1;
 let lives = 3;
 let score = 0;
-let sequence = [];
-let playerSequence = [];
-let isPlayerTurn = false;
 
-// Квадраты
-const squares = [
-  { x: 50, y: 50, color: "white" },
-  { x: 250, y: 50, color: "white" },
-  { x: 50, y: 250, color: "white" },
-  { x: 250, y: 250, color: "white" },
-];
-
-// Функция отрисовки квадратов
-function drawSquares() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  squares.forEach((square) => {
-    ctx.fillStyle = square.color;
-    ctx.fillRect(square.x, square.y, 100, 100);
-  });
-}
-
-// Генерация последовательности
-function generateSequence() {
-  sequence.push(Math.floor(Math.random() * squares.length));
-}
-
-// Проигрывание последовательности
-async function playSequence() {
-  isPlayerTurn = false;
-  for (let i = 0; i < sequence.length; i++) {
-    const squareIndex = sequence[i];
-    squares[squareIndex].color = "yellow";
-    drawSquares();
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    squares[squareIndex].color = "white";
-    drawSquares();
-    await new Promise((resolve) => setTimeout(resolve, 400));
-  }
-  isPlayerTurn = true;
-}
-
-// Проверка последовательности игрока
-function checkPlayerSequence() {
-  for (let i = 0; i < playerSequence.length; i++) {
-    if (playerSequence[i] !== sequence[i]) {
-      lives--;
-      alert("Wrong sequence! Try again.");
-      if (lives === 0) {
-        gameOver();
-      }
-      return resetRound();
-    }
-  }
-  if (playerSequence.length === sequence.length) {
-    score += 10;
-    level++;
-    nextLevel();
-  }
-}
-
-// Переход на следующий уровень
-function nextLevel() {
-  playerSequence = [];
-  generateSequence();
-  playSequence();
-}
-
-// Сброс раунда
-function resetRound() {
-  playerSequence = [];
-  playSequence();
-}
-
-// Конец игры
-function gameOver() {
-  alert("Game Over! Buy more lives to continue.");
-  document.getElementById("gameover").style.display = "block";
-}
-
-// Начало игры
 function startGame() {
+  resetGame();
+  nextLevel();
+}
+
+function resetGame() {
+  sequence = [];
+  playerSequence = [];
   level = 1;
   lives = 3;
   score = 0;
-  sequence = [];
-  playerSequence = [];
-  generateSequence();
-  playSequence();
+  updateStatus();
 }
 
-// Обработчик клика на квадраты
-canvas.addEventListener("click", (e) => {
-  if (!isPlayerTurn) return;
+function nextLevel() {
+  sequence.push(Math.floor(Math.random() * 3)); // Добавляем новый шаг
+  playerSequence = [];
+  showSequence();
+}
 
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  squares.forEach((square, index) => {
-    if (x >= square.x && x <= square.x + 100 && y >= square.y && y <= square.y + 100) {
-      playerSequence.push(index);
-      square.color = "green";
-      drawSquares();
-      setTimeout(() => {
-        square.color = "white";
-        drawSquares();
-        checkPlayerSequence();
-      }, 500);
+function showSequence() {
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < sequence.length) {
+      highlightSquare(sequence[i]);
+      i++;
+    } else {
+      clearInterval(interval);
+      setTimeout(() => promptPlayer(), 500);
     }
-  });
-});
+  }, 1000);
+}
+
+function highlightSquare(index) {
+  const colors = ["#FFD700", "#FFFFFF"]; // Yellow, White
+  const positions = [50, 150, 250];
+
+  // Показываем квадрат
+  ctx.fillStyle = colors[0];
+  ctx.fillRect(positions[index], 150, 80, 80);
+
+  setTimeout(() => {
+    ctx.fillStyle = colors[1];
+    ctx.fillRect(positions[index], 150, 80, 80);
+  }, 500);
+}
+
+function promptPlayer() {
+  canvas.addEventListener("click", handlePlayerInput);
+}
+
+function handlePlayerInput(event) {
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+
+  let clickedSquare;
+  if (x >= 50 && x <= 130) clickedSquare = 0;
+  else if (x >= 150 && x <= 230) clickedSquare = 1;
+  else if (x >= 250 && x <= 330) clickedSquare = 2;
+
+  if (clickedSquare !== undefined) {
+    playerSequence.push(clickedSquare);
+    checkPlayerInput(clickedSquare);
+  }
+}
+
+function checkPlayerInput(clickedSquare) {
+  const currentStep = playerSequence.length - 1;
+
+  if (clickedSquare === sequence[currentStep]) {
+    highlightSquare(clickedSquare, true); // Зеленый
+    if (playerSequence.length === sequence.length) {
+      score += 10;
+      level++;
+      updateStatus();
+      canvas.removeEventListener("click", handlePlayerInput);
+      setTimeout(() => nextLevel(), 1000);
+    }
+  } else {
+    highlightSquare(clickedSquare, false); // Красный
+    lives--;
+    updateStatus();
+    if (lives === 0) {
+      gameOver();
+    } else {
+      canvas.removeEventListener("click", handlePlayerInput);
+      setTimeout(() => showSequence(), 1000);
+    }
+  }
+}
+
+function gameOver() {
+  alert("Game Over! Lives exhausted.");
+}
+
+function updateStatus() {
+  document.getElementById("status").textContent = `Level: ${level} | Lives: ${lives} | Score: ${score}`;
+}
