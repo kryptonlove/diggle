@@ -9,15 +9,21 @@ let gameStarted = false;
 
 function setup() {
     createCanvas(400, 400);
-    background(255);
+    background(100,100,100);
+    
+    // Прячем стартовый экран сразу
+    document.getElementById('start-screen').style.display = 'block';
+    document.getElementById('gameover-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('play-btn').style.display = 'none';
 
-    // Connect Wallet Button
+    // Кнопка для подключения кошелька
     document.getElementById('connect-btn').addEventListener('click', connectWallet);
 
-    // Play Button
+    // Кнопка для начала игры
     document.getElementById('play-btn').addEventListener('click', startGame);
 
-    // Buy Life Button
+    // Кнопка для покупки жизни
     document.getElementById('buy-life').addEventListener('click', buyLife);
 }
 
@@ -36,6 +42,7 @@ function displayCircles() {
     let circleSize = 50;
     let spacing = 100;
 
+    // Рисуем три круга, один из которых зеленый
     for (let i = 0; i < 3; i++) {
         let x = spacing * (i + 1);
         let y = height / 2;
@@ -66,13 +73,14 @@ function checkCircleHit() {
         let x = spacing * (i + 1);
         let y = height / 2;
         
+        // Проверяем, был ли кликнут правильный круг
         if (dist(mouseX, mouseY, x, y) < circleSize / 2) {
             if (i === correctCircleIndex) {
                 score++;
             } else {
                 lives--;
             }
-            correctCircleIndex = floor(random(3));
+            correctCircleIndex = floor(random(3)); // Обновляем зеленый круг
         }
     }
 }
@@ -85,7 +93,8 @@ function connectWallet() {
             walletConnected = true;
             document.getElementById('wallet-info').innerText = `Connected: ${userAccount}`;
             document.getElementById('play-btn').style.display = 'inline-block';
-            document.getElementById('connect-btn').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'none'; // Скрываем стартовый экран
+            document.getElementById('game-screen').style.display = 'block'; // Показываем экран игры
         });
     } else {
         alert('Please install MetaMask!');
@@ -94,20 +103,20 @@ function connectWallet() {
 
 function startGame() {
     gameStarted = true;
-    correctCircleIndex = floor(random(3));
-    document.getElementById('game-screen').style.display = 'none';
+    correctCircleIndex = floor(random(3)); // Задаем случайный индекс для зеленого круга
+    document.getElementById('play-btn').style.display = 'none'; // Скрываем кнопку Play
 }
 
 function showGameOver() {
     gameStarted = false;
-    document.getElementById('gameover-screen').style.display = 'block';
+    document.getElementById('gameover-screen').style.display = 'block'; // Показываем Game Over экран
 }
 
 function buyLife() {
-    // Here you'd interact with smart contracts for USDC transfer
+    // Имитация покупки жизни за USDC (реализуй с помощью смарт-контрактов позже)
     alert('Buying life for 1 USDC...');
-    lives = 1; // Reset lives after purchase
-    document.getElementById('gameover-screen').style.display = 'none';
-    gameStarted = true;
-    score = 0;
+    lives = 1; // Сбрасываем жизни после покупки
+    document.getElementById('gameover-screen').style.display = 'none'; // Скрываем Game Over экран
+    gameStarted = true; // Перезапускаем игру
+    score = 0; // Сбрасываем счет
 }
