@@ -15,7 +15,7 @@ async function setup() {
     // Подключаем MetaMask
     if (typeof window.ethereum !== 'undefined') {
         console.log('MetaMask is available!');
-        provider = new ethers.BrowserProvider(window.ethereum);
+        provider = new ethers.providers.Web3Provider(window.ethereum); // Правильное подключение
     } else {
         alert('Please install MetaMask');
     }
@@ -30,8 +30,8 @@ async function setup() {
 async function startGame() {
     // Подключение MetaMask
     try {
-        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-        signer = provider.getSigner();
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        signer = provider.getSigner();  // Получаем signer после подключения
         userAddress = await signer.getAddress();
         console.log('Connected address:', userAddress);
         gameStarted = true;
