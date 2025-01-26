@@ -8,23 +8,23 @@
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.6.0/dist/ethers.min.js"></script>
 </head>
 <body>
-    <h1>Simple Game</h1>
+    <h1>Simple Game 1</h1>
     <button id="start-btn">Start Game</button>
     <div id="game-container"></div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Ваш код в game.js теперь будет выполняться только после того, как страница загружена
+            // Подключаем p5.js после того, как загрузился DOM
             let provider, signer, usdcContract;
             let userAddress = '';
             const usdcAddress = '0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca'; // Адрес контракта USDC в сети Base
             const myAddress = 'YOUR_WALLET_ADDRESS'; // Твой адрес кошелька
+            let lives = 2; // Начальные жизни
+            let gameStarted = false;
 
             async function setup() {
                 // Создаем канвас
-                const canvas = createCanvas(400, 400);
-                canvas.parent('game-container');
-                document.getElementById('game-container').style.display = 'none';
+                createCanvas(400, 400).parent('game-container');  // Убедись, что p5.js доступен
 
                 // Слушаем кнопку старта игры
                 document.getElementById('start-btn').addEventListener('click', startGame);
