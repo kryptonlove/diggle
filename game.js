@@ -7,20 +7,19 @@ let spacing = 100;
 
 function setup() {
     const canvas = createCanvas(400, 400);
-    canvas.parent('game-canvas');  // Привязываем canvas к элементу в HTML
+    canvas.parent('game-container');  // Привязываем canvas к элементу в HTML
 
-    // Обработчик нажатия на кнопку
-    const startBtn = document.getElementById('start-btn');
-    startBtn.addEventListener('click', startGame);
+    // Скрываем игру до нажатия кнопки
+    document.getElementById('game-container').style.display = 'none';
 
-    document.getElementById('start-screen').style.display = 'block';
-    document.getElementById('game-screen').style.display = 'none';
+    // Обработчик нажатия на кнопку старта
+    document.getElementById('start-btn').addEventListener('click', startGame);
 }
 
 function draw() {
-    if (gameStarted) {
-        background(255);
+    background(255);
 
+    if (gameStarted) {
         // Отображаем круги
         displayCircles();
         
@@ -78,8 +77,8 @@ function checkCircleHit() {
 
 function startGame() {
     gameStarted = true;
-    document.getElementById('start-screen').style.display = 'none';
-    document.getElementById('game-screen').style.display = 'block';
+    document.getElementById('game-container').style.display = 'block';  // Показываем канвас
+    document.getElementById('start-btn').style.display = 'none';  // Прячем кнопку старта
 
     // Начальный круг для угадывания
     correctCircleIndex = floor(random(3));
