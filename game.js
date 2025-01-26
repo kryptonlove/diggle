@@ -3,13 +3,12 @@ let web3;
 let userAccount;
 let score = 0;
 let lives = 2;
-let circles = [];
 let correctCircleIndex = -1;
 let gameStarted = false;
 
 function setup() {
     createCanvas(400, 400);
-    background(100,100,100);
+    background(255);
     
     // Прячем стартовый экран сразу
     document.getElementById('start-screen').style.display = 'block';
@@ -85,17 +84,22 @@ function checkCircleHit() {
     }
 }
 
-function connectWallet() {
+async function connectWallet() {
     if (typeof window.ethereum !== 'undefined') {
         web3 = new Web3(window.ethereum);
-        window.ethereum.request({ method: 'eth_requestAccounts' }).then(accounts => {
+        try {
+            // Запрашиваем аккаунты пользователя
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             userAccount = accounts[0];
             walletConnected = true;
             document.getElementById('wallet-info').innerText = `Connected: ${userAccount}`;
             document.getElementById('play-btn').style.display = 'inline-block';
             document.getElementById('start-screen').style.display = 'none'; // Скрываем стартовый экран
             document.getElementById('game-screen').style.display = 'block'; // Показываем экран игры
-        });
+        } catch (error) {
+            console.error("User denied account access or some error occurred", error);
+            alert("Ошибка подключения кошелька. Пожалуйста, попробуйте снова.");
+        }
     } else {
         alert('Please install MetaMask!');
     }
