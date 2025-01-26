@@ -10,6 +10,8 @@ function setup() {
     createCanvas(400, 400);
     background(255);
     
+    console.log("Game setup started");
+
     // Прячем стартовый экран сразу
     document.getElementById('start-screen').style.display = 'block';
     document.getElementById('gameover-screen').style.display = 'none';
@@ -18,10 +20,8 @@ function setup() {
 
     // Кнопка для подключения кошелька
     document.getElementById('connect-btn').addEventListener('click', connectWallet);
-
     // Кнопка для начала игры
     document.getElementById('play-btn').addEventListener('click', startGame);
-
     // Кнопка для покупки жизни
     document.getElementById('buy-life').addEventListener('click', buyLife);
 }
@@ -40,6 +40,8 @@ function draw() {
 function displayCircles() {
     let circleSize = 50;
     let spacing = 100;
+
+    console.log("Displaying circles");
 
     // Рисуем три круга, один из которых зеленый
     for (let i = 0; i < 3; i++) {
@@ -67,16 +69,21 @@ function mousePressed() {
 function checkCircleHit() {
     let circleSize = 50;
     let spacing = 100;
-    
+
+    console.log("Checking circle hit");
+
     for (let i = 0; i < 3; i++) {
         let x = spacing * (i + 1);
         let y = height / 2;
-        
+
         // Проверяем, был ли кликнут правильный круг
         if (dist(mouseX, mouseY, x, y) < circleSize / 2) {
+            console.log("Circle clicked: " + i);
             if (i === correctCircleIndex) {
+                console.log("Correct circle clicked");
                 score++;
             } else {
+                console.log("Incorrect circle clicked");
                 lives--;
             }
             correctCircleIndex = floor(random(3)); // Обновляем зеленый круг
@@ -85,11 +92,14 @@ function checkCircleHit() {
 }
 
 async function connectWallet() {
+    console.log("Connecting wallet");
+
     if (typeof window.ethereum !== 'undefined') {
         web3 = new Web3(window.ethereum);
         try {
             // Запрашиваем аккаунты пользователя
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            console.log("Connected accounts:", accounts);
             userAccount = accounts[0];
             walletConnected = true;
             document.getElementById('wallet-info').innerText = `Connected: ${userAccount}`;
@@ -97,26 +107,30 @@ async function connectWallet() {
             document.getElementById('start-screen').style.display = 'none'; // Скрываем стартовый экран
             document.getElementById('game-screen').style.display = 'block'; // Показываем экран игры
         } catch (error) {
-            console.error("User denied account access or some error occurred", error);
+            console.error("Error connecting wallet:", error);
             alert("Ошибка подключения кошелька. Пожалуйста, попробуйте снова.");
         }
     } else {
+        console.log("MetaMask is not installed");
         alert('Please install MetaMask!');
     }
 }
 
 function startGame() {
+    console.log("Game started");
     gameStarted = true;
     correctCircleIndex = floor(random(3)); // Задаем случайный индекс для зеленого круга
     document.getElementById('play-btn').style.display = 'none'; // Скрываем кнопку Play
 }
 
 function showGameOver() {
+    console.log("Game Over");
     gameStarted = false;
     document.getElementById('gameover-screen').style.display = 'block'; // Показываем Game Over экран
 }
 
 function buyLife() {
+    console.log("Buying life");
     // Имитация покупки жизни за USDC (реализуй с помощью смарт-контрактов позже)
     alert('Buying life for 1 USDC...');
     lives = 1; // Сбрасываем жизни после покупки
