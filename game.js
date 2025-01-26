@@ -1,85 +1,66 @@
-let gameStarted = false;
-let score = 0;
-let lives = 2;
-let correctCircleIndex = -1;
-let circleSize = 50;
-let spacing = 100;
+let provider, signer, usdcContract;
+let userAddress = '';
+const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // Адрес контракта USDC в сети Base
+const myAddress = '0x097d5f575eCF546103fc9A5b1504872231cC5DAd'; // Твой адрес кошелька
 
-function setup() {
+async function setup() {
+    // Создаем канвас
     const canvas = createCanvas(400, 400);
-    canvas.parent('game-container');  // Привязываем canvas к элементу в HTML
-
-    // Скрываем игру до нажатия кнопки
+    canvas.parent('game-container');
     document.getElementById('game-container').style.display = 'none';
 
-    // Обработчик нажатия на кнопку старта
+    // Слушаем кнопку старта игры
     document.getElementById('start-btn').addEventListener('click', startGame);
+
+    // Подключаем MetaMask
+    if (typeof window.ethereum !== 'undefined') {
+        console.log('MetaMask is available!');
+        provider = new ethers.BrowserProvider(window.ethereum);
+    } else {
+        alert('Please install MetaMask');
+    }
+
+    // Инициализируем контракт USDC
+    const usdcAbi = [
+        "function transfer(address recipient, uint amount) public returns (bool)"
+    ];
+    usdcContract = new ethers.Contract(usdcAddress, usdcAbi, provider);
 }
 
-function draw() {
-    background(255);
-
-    if (gameStarted) {
-        // Отображаем круги
-        displayCircles();
-        
-        // Отображаем счет и жизни
-        displayScoreAndLives();
+async function startGame() {
+    // Подключение MetaMask
+    try {
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        console.log('Connected address:', userAddress);
+        gameStarted = true;
+        document.getElementById('game-container').style.display = 'block';
+        document.getElementById('start-btn').style.display = 'none';
+    } catch (error) {
+        console.error('Error connecting wallet:', error);
     }
 }
 
-function displayCircles() {
-    // Рисуем три круга, один из которых зеленый
-    for (let i = 0; i < 3; i++) {
-        let x = spacing * (i + 1);
-        let y = height / 2;
-        let c = (i === correctCircleIndex) ? color(0, 255, 0) : color(255);
-        fill(c);
-        ellipse(x, y, circleSize);
-    }
-}
-
-function displayScoreAndLives() {
-    textSize(20);
-    fill(0);
-    text("Score: " + score, 10, 30);
-    text("Lives: " + lives, width - 100, 30);
-}
-
-function mousePressed() {
-    if (gameStarted) {
-        checkCircleHit();
-    }
-}
-
-function checkCircleHit() {
-    for (let i = 0; i < 3; i++) {
-        let x = spacing * (i + 1);
-        let y = height / 2;
-
-        // Проверяем, был ли кликнут правильный круг
-        if (dist(mouseX, mouseY, x, y) < circleSize / 2) {
-            if (i === correctCircleIndex) {
-                score++;
-            } else {
-                lives--;
-            }
-            correctCircleIndex = floor(random(3)); // Обновляем, какой круг зеленый
-        }
-    }
-
-    // Если жизни закончились
+async function handleGameOver() {
+    // Показываем окно для покупки жизни
     if (lives <= 0) {
-        gameStarted = false;
-        alert('Game Over!');
+        const buyButton = document.createElement('button');
+        buyButton.innerText = 'Buy 1 Life for 1 USDC';
+        buyButton.onclick = buyLife;
+        document.body.appendChild(buyButton);
     }
 }
 
-function startGame() {
-    gameStarted = true;
-    document.getElementById('game-container').style.display = 'block';  // Показываем канвас
-    document.getElementById('start-btn').style.display = 'none';  // Прячем кнопку старта
-
-    // Начальный круг для угадывания
-    correctCircleIndex = floor(random(3));
+async function buyLife() {
+    try {
+        const amount = ethers.parseUnits("1", 6); // 1 USDC (с учетом 6 десятичных знаков)
+        const tx = await usdcContract.transfer(myAddress, amount);
+        await tx.wait();
+        console.log('Payment successful');
+        lives = 1; // Возвращаем 1 жизнь игроку
+        document.body.removeChild(document.querySelector('button')); // Убираем кнопку после покупки
+    } catch (error) {
+        console.error('Error making payment:', error);
+    }
 }
