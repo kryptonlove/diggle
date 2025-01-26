@@ -1,20 +1,19 @@
 let userWallet;
 
-// Кнопка "Connect Wallet"
+// Элементы HTML
 const connectWalletBtn = document.getElementById("connectWallet");
+const playGameBtn = document.getElementById("playGame");
+const canvas = document.getElementById("gameCanvas");
 
-// Обработчик нажатия на кнопку
+// Подключение кошелька
 connectWalletBtn.addEventListener("click", async () => {
   try {
-    // Проверяем наличие Ethereum провайдера (например, MetaMask)
     if (typeof window.ethereum !== "undefined") {
-      console.log("MetaMask detected!");
-
-      // Запрашиваем доступ к кошельку
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      userWallet = accounts[0]; // Получаем адрес подключённого кошелька
+      userWallet = accounts[0];
       alert(`Connected: ${userWallet}`);
-      connectWalletBtn.innerText = "Wallet Connected"; // Обновляем текст кнопки
+      connectWalletBtn.style.display = "none"; // Скрываем кнопку "Connect Wallet"
+      playGameBtn.style.display = "block"; // Показываем кнопку "Play"
     } else {
       alert("No Ethereum wallet detected. Please install MetaMask.");
     }
@@ -22,4 +21,11 @@ connectWalletBtn.addEventListener("click", async () => {
     console.error("Error connecting wallet:", error);
     alert("Error connecting wallet. Check console for details.");
   }
+});
+
+// Запуск игры
+playGameBtn.addEventListener("click", () => {
+  canvas.style.display = "block"; // Показываем канвас
+  playGameBtn.style.display = "none"; // Скрываем кнопку "Play"
+  startGame(); // Вызываем логику игры
 });
